@@ -28,6 +28,7 @@ Clone the following repositories:
         git clone git@github.com:facebookresearch/segment-anything.git
         cd segment-anything; pip install -e .
         ```
+    - move 'segment_anything' folder out of 'segment-anything' and into 'sam' for proper functionality
 - [Detectron2](https://github.com/facebookresearch/detectron2)
     ```bash
     git clone https://github.com/facebookresearch/detectron2.git
