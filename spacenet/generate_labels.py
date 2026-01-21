@@ -10,7 +10,11 @@ import json
 IMAGE_SIZE = 512
 KEYPOINT_RADIUS = 3
 ROAD_WIDTH = 3
-output_dir = '../processed'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory where script lives
+print(BASE_DIR)
+DATA_DIR = os.path.join(BASE_DIR, "RGB_1.0_meter")
+JSON_DATA = os.path.join(BASE_DIR, "data_split.json")
+output_dir = os.path.join(BASE_DIR, "processed")
 
 def create_directory(dir,delete=False):
     if os.path.isdir(dir) and delete:
@@ -73,7 +77,7 @@ def draw_line_segments_on_image(size, line_segments, width):
 
 create_directory(output_dir,delete=True)
 
-with open('../data_split.json','r') as jf:
+with open(JSON_DATA,'r') as jf:
     data_list = json.load(jf)
     data_list = data_list['test'] + data_list['validation'] + data_list['train']
 for data_index, tile_index in enumerate(data_list):
@@ -84,7 +88,7 @@ for data_index, tile_index in enumerate(data_list):
     vertex_flag = True
                          
     # Load GT Graph
-    gt_graph = pickle.load(open(f"../{tile_index}__gt_graph.p",'rb'))
+    gt_graph = pickle.load(open(os.path.join(DATA_DIR, f"{tile_index}__gt_graph.p"),'rb'))
     graph = nx.Graph()  # undirected
     for n, neis in gt_graph.items():
         for nei in neis:
