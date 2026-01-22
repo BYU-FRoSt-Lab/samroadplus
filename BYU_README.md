@@ -35,4 +35,5 @@ Clone the following repositories:
     pip install -e . --no-build-isolation
     ```
 
+Clone [sam_road](https://github.com/htcr/sam_road) repository but only keep 'config' folder. This folder will be needed when running 'train.py' as described in main README.
 
