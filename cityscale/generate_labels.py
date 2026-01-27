@@ -10,7 +10,6 @@ KEYPOINT_RADIUS = 3
 ROAD_WIDTH = 3
 # Load GT Graph
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory where script lives
-print(BASE_DIR)
 DATA_DIR = os.path.join(BASE_DIR, "20cities")
 output_dir = os.path.join(BASE_DIR, "processed")
 

@@ -59,8 +59,11 @@ def globalscale_data_partition():
     return indrange_train, indrange_validation, indrange_test,indrange_test_out_domain
 
 def spacenet_data_partition():
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory where script lives
+    DATA_DIR = os.path.join(BASE_DIR, "spacenet")
+    JSON_DATA = os.path.join(DATA_DIR, "data_split.json")
     # dataset partition
-    with open('../data_split.json','r') as jf:
+    with open(JSON_DATA,'r') as jf:
         data_list = json.load(jf)
     train_list = data_list['train']
     val_list = data_list['validation']
@@ -245,16 +248,24 @@ def graph_collate_fn(batch):
 
 class SatMapDataset(Dataset):
     def __init__(self, config, is_train, dev_run=False):
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory where script lives
+        # DATA_DIR_GS = os.path.join(BASE_DIR, "20cities")
+        
+
         self.config = config
         assert self.config.DATASET in {'cityscale','globalscale', 'spacenet'}
         if self.config.DATASET == 'cityscale':
+            DIR_CS = os.path.join(BASE_DIR, self.config.DATASET)
+            DATA_DIR_CS = os.path.join(DIR_CS, "20cities")
+            PROCESSED_DIR = os.path.join(DIR_CS, "processed")
+
             self.IMAGE_SIZE = 2048
             # TODO: SAMPLE_MARGIN here is for training, the one in config is for inference
             self.SAMPLE_MARGIN = 64
-            rgb_pattern = '../region_{}_sat.png'
-            keypoint_mask_pattern = '../keypoint_mask_{}.png'
-            road_mask_pattern = '../road_mask_{}.png'
-            gt_graph_pattern = '../region_{}_refine_gt_graph.p'
+            rgb_pattern = os.path.join(DATA_DIR_CS, 'region_{}_sat.png')
+            keypoint_mask_pattern = os.path.join(PROCESSED_DIR, 'keypoint_mask_{}.png')
+            road_mask_pattern = os.path.join(PROCESSED_DIR, 'road_mask_{}.png') 
+            gt_graph_pattern = os.path.join(DATA_DIR_CS, 'region_{}_refine_gt_graph.p')
 
             train, val, test = cityscale_data_partition()
         
@@ -278,12 +289,16 @@ class SatMapDataset(Dataset):
             coord_transform = lambda v : v[:, ::-1]
 
         elif self.config.DATASET == 'spacenet':
+            DIR_SN = os.path.join(BASE_DIR, self.config.DATASET)
+            DATA_DIR_SN = os.path.join(DIR_SN, "RGB_1.0_meter")
+            PROCESSED_DIR = os.path.join(DIR_SN, "processed")
+
             self.IMAGE_SIZE = 400
             self.SAMPLE_MARGIN = 0
-            rgb_pattern = '../{}__rgb.png'
-            keypoint_mask_pattern = '../processed/keypoint_mask_{}.png'
-            road_mask_pattern = '../processed/road_mask_{}.png'
-            gt_graph_pattern = '../{}__gt_graph.p'
+            rgb_pattern = os.path.join(DATA_DIR_SN, '{}__rgb.png') 
+            keypoint_mask_pattern = os.path.join(PROCESSED_DIR, 'keypoint_mask_{}.png') 
+            road_mask_pattern = os.path.join(PROCESSED_DIR, 'road_mask_{}.png')
+            gt_graph_pattern = os.path.join(DATA_DIR_SN, '{}__gt_graph.p')  
             
             train, val, test = spacenet_data_partition()
 
