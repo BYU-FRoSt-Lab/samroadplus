@@ -219,25 +219,51 @@ if __name__ == "__main__":
     # load checkpoint
     checkpoint = torch.load(args.checkpoint, map_location="cpu")
     print(f'##### Loading Trained CKPT {args.checkpoint} #####')
-    net.load_state_dict(checkpoint["state_dict"], strict=True)
+    if "state_dict" in checkpoint:
+        net.load_state_dict(checkpoint["state_dict"], strict=True)
+    else:
+        # Fallback for raw files (rare for Lightning)
+        net.load_state_dict(checkpoint, strict=True)
     net.eval()
     net.to(device)
 
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory where script lives
+
     if config.DATASET == 'cityscale':
+        DATA_DIR = os.path.join(BASE_DIR, "cityscale/20cities")
         _, _, test_img_indices = cityscale_data_partition()
-        rgb_pattern = '../region_{}_sat.png'
+        rgb_pattern = os.path.join(DATA_DIR, 'region_{}_sat.png')
 
     elif config.DATASET == 'globalscale_outdomain':
-        _, _, _,test_img_indices = globalscale_data_partition()   
-        rgb_pattern = '../region_{}_sat.png'
+        DATA_DIR = os.path.join(BASE_DIR, "globalscale/Global-Scale/out_of_domain")
+        files = sorted(
+            [f for f in os.listdir(DATA_DIR)
+            if f.endswith("_refine_gt_graph.p")],
+            key=lambda x: int(x.split("_")[1])
+            )
+        test_img_indices = []
+        for fname in files:
+            tile_idx = fname.split("_")[1] 
+            test_img_indices.append(tile_idx)
+        rgb_pattern = os.path.join(DATA_DIR, 'region_{}_sat.png')
 
     elif config.DATASET == 'globalscale':
-        _, _, test_img_indices,_ = globalscale_data_partition()
-        rgb_pattern = '../region_{}_sat.png'
+        DATA_DIR = os.path.join(BASE_DIR, "globalscale/Global-Scale/in-domain-test")
+        files = sorted(
+            [f for f in os.listdir(DATA_DIR)
+            if f.endswith("_refine_gt_graph.p")],
+            key=lambda x: int(x.split("_")[1])
+            )
+        test_img_indices = []
+        for fname in files:
+            tile_idx = fname.split("_")[1] 
+            test_img_indices.append(tile_idx)
+        rgb_pattern = os.path.join(DATA_DIR, 'region_{}_sat.png')
 
     elif config.DATASET == 'spacenet':
+        DATA_DIR = os.path.join(BASE_DIR, "spacenet/RGB_1.0_meter")
         _, _, test_img_indices = spacenet_data_partition()
-        rgb_pattern = '../{}__rgb.png'
+        rgb_pattern = os.path.join(DATA_DIR, '{}__rgb.png')
    
     output_dir_prefix = './save/infer_'
     if args.output_dir:
